@@ -1,0 +1,35 @@
+{
+  "name": "node-static-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "precommit": "lint-staged"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shiyou00/node-static-server.git"
+  },
+  "lint-staged": {
+    "./src/*.{js,json,css}": [
+      "eslint --fix --",
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shiyou00/node-static-server/issues"
+  },
+  "homepage": "https://github.com/shiyou00/node-static-server#readme",
+  "devDependencies": {
+    "eslint": "^6.2.2",
+    "eslint-plugin-prettier": "^3.1.0",
+    "husky": "^3.0.4",
+    "lint-staged": "^9.2.4",
+    "prettier": "^1.18.2"
+  }
+}
