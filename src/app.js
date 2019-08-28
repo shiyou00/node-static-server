@@ -24,8 +24,18 @@ const exportStats = async function(filePath, res, req) {
       // 要传入到模板中的数据
       const data = {
         title: path.basename(filePath),
-        dir: req.url,
-        files
+        dir: req.url === "/" ? "" : req.url,
+        prev: {
+          path: path.dirname(req.url), // 计算出上一层的路径
+          icon: conf.dirIcon // 统一使用文件夹icon
+        },
+        files: files.map(file => {
+          // 简单判断：当文件名有.的我们认为是文件，没有.的我们认为是文件夹
+          return {
+            file: file,
+            icon: file.includes(".") ? conf.fileIcon : conf.dirIcon
+          };
+        })
       };
       res.statusCode = 200;
       res.setHeader("Content-Type", "text/html");
