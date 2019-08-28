@@ -16,7 +16,7 @@ const exportStats = async function(filePath, res, req) {
     if (stats.isFile()) {
       // 路径为文件
       res.statusCode = 200;
-      res.setHeader("Content-Type", "text/plain");
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
       fs.createReadStream(filePath).pipe(res);
     } else if (stats.isDirectory()) {
       // 路径为文件夹，我们输出文件列表
@@ -43,7 +43,7 @@ const exportStats = async function(filePath, res, req) {
     }
   } catch (e) {
     res.statusCode = 404;
-    res.setHeader("Content-Type", "text/plain");
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
     res.end(`${filePath} 不存在\n${e}`);
   }
 };
