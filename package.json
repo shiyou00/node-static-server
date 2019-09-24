@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "bin":{
+    "anydoor":"bin/anydoor"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "supervisor src/app.js",
@@ -35,6 +38,7 @@
     "prettier": "^1.18.2"
   },
   "dependencies": {
-    "handlebars": "^4.1.2"
+    "handlebars": "^4.1.2",
+    "yargs": "^14.0.0"
   }
 }

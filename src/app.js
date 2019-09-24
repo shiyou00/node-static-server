@@ -62,7 +62,9 @@ const isFresh = (stats, req, res) => {
   // 走到这里说明 缓存可用
   return true;
 };
+
 const compress = /\.(html|js|css|md)/;
+
 const handleCompress = (rs, req, res) => {
   // 第一步读取浏览器支持的压缩方式
   const acceptEncoding = req.headers["accept-encoding"];
@@ -78,7 +80,7 @@ const handleCompress = (rs, req, res) => {
   }
 };
 
-const exportStats = async function(filePath, res, req) {
+const exportStats = async function(filePath, res, req, conf) {
   try {
     const stats = await stat(filePath);
     if (stats.isFile()) {
@@ -127,11 +129,23 @@ const exportStats = async function(filePath, res, req) {
   }
 };
 
-const server = http.createServer((req, res) => {
-  const filePath = path.join(conf.root, req.url); // 当前目录的绝对路径 + 访问的url路径
-  exportStats(filePath, res, req);
-});
+class Server {
+  constructor(config) {
+    this.conf = Object.assign({}, conf, config);
+  }
 
-server.listen(conf.port, conf.hostname, () => {
-  console.info(`Server running at http://${conf.hostname}:${conf.port}`);
-});
+  start() {
+    const server = http.createServer((req, res) => {
+      const filePath = path.join(this.conf.root, req.url); // 当前目录的绝对路径 + 访问的url路径
+      exportStats(filePath, res, req, this.conf);
+    });
+
+    server.listen(this.conf.port, this.conf.hostname, () => {
+      console.info(
+        `Server running at http://${this.conf.hostname}:${this.conf.port}`
+      );
+    });
+  }
+}
+
+module.exports = Server;
