@@ -11,7 +11,57 @@ const source = fs.readFileSync(tplPath);
 const template = Handlebars.compile(source.toString());
 const mime = require("./config/mime");
 const { createGzip, createDeflate } = require("zlib");
+const cache = {
+  maxAge: 600,
+  expires: true,
+  cacheControl: true,
+  lastModified: true,
+  etag: true
+};
+// 通过上面的配置文件给浏览器设置相应头信息
+const refreshRes = (stats, res) => {
+  if (cache.expires) {
+    res.setHeader(
+      "Expires",
+      new Date(Date.now() + cache.maxAge * 1000).toUTCString()
+    );
+  }
 
+  if (cache.cacheControl) {
+    res.setHeader("Cache-Control", `public,max-age=${cache.maxAge}`);
+  }
+
+  if (cache.lastModified) {
+    res.setHeader("Last-Modified", stats.mtime.toUTCString());
+  }
+
+  if (cache.etag) {
+    res.setHeader("ETag", `${stats.size}-${stats.mtime}`);
+  }
+};
+
+const isFresh = (stats, req, res) => {
+  refreshRes(stats, res);
+  // 获取浏览器的请求头信息
+  const lastModified = req.headers["if-modified-since"];
+  const etag = req.headers["if-none-match"];
+
+  // 获取不到lastModified 和 etag 表明用户是第一次请求该资源
+  if (!etag && !lastModified) {
+    return false;
+  }
+
+  // 如果有lastModified 并且 浏览器请求的lastModified 和 res的不一致 则说明缓存已经过期
+  if (lastModified && lastModified !== res.getHeader("Last-Modified")) {
+    return false;
+  }
+  // 同理etag
+  if (etag && etag !== res.getHeader("ETag")) {
+    return false;
+  }
+  // 走到这里说明 缓存可用
+  return true;
+};
 const compress = /\.(html|js|css|md)/;
 const handleCompress = (rs, req, res) => {
   // 第一步读取浏览器支持的压缩方式
@@ -33,9 +83,15 @@ const exportStats = async function(filePath, res, req) {
     const stats = await stat(filePath);
     if (stats.isFile()) {
       const contentType = mime(filePath);
+      res.setHeader("Content-Type", contentType);
+      // 判断如果缓存可用
+      if (isFresh(stats, req, res)) {
+        res.statusCode = 304;
+        res.end();
+        return;
+      }
       // 路径为文件
       res.statusCode = 200;
-      res.setHeader("Content-Type", contentType);
       let rs = fs.createReadStream(filePath);
       if (filePath.match(compress)) {
         rs = handleCompress(rs, req, res);

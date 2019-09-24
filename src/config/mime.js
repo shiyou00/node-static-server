@@ -14,7 +14,7 @@ const mimeTypes = {
   'svg': 'image/svg+xml',
   'swf': 'application/x-shockwave-flash',
   'tiff': 'image/tiff',
-  'txt': 'image/plain',
+  'txt': 'text/plain',
   'wav': 'audio/x-wav'
 };
 
